@@ -1,0 +1,20 @@
+[package]
+name = "godot_ratex"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[profile.release]
+opt-level = "z"     # Optimize binary specifically for SIZE (aggressive)
+lto = true          # Enable Link-Time Optimization across crates (removes dead code)
+codegen-units = 1   # Reduce parallel processing units so LTO works optimally
+strip = "symbols"   # Remove all debug symbols & unused functions automatically
+
+[dependencies]
+godot = "0.5.3"
+ratex-parser = { git = "https://github.com/erweixin/RaTeX.git" }
+ratex-types = { git = "https://github.com/erweixin/RaTeX.git" }
+ratex-layout = { git = "https://github.com/erweixin/RaTeX.git" }
+ratex-render = { git = "https://github.com/erweixin/RaTeX.git", features = ["embed-fonts"] }

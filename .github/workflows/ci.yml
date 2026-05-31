@@ -1,0 +1,240 @@
+name: Build & Test
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+env:
+  PACKAGE_NAME: godot_ratex
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Test (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test
+
+  build:
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            label: linux-x86_64
+            target: x86_64-unknown-linux-gnu
+            ext: .so
+            prefix: lib
+            arch-suffix: .x86_64
+            addon-subdir: linux
+
+          - os: ubuntu-latest
+            label: linux-arm64
+            target: aarch64-unknown-linux-gnu
+            ext: .so
+            prefix: lib
+            arch-suffix: .arm64
+            addon-subdir: linux
+
+          - os: windows-latest
+            label: windows-x86_64
+            target: x86_64-pc-windows-msvc
+            ext: .dll
+            prefix: ""
+            arch-suffix: .x86_64
+            addon-subdir: windows
+
+          - os: macos-latest
+            label: macos-arm64
+            target: aarch64-apple-darwin
+            ext: .dylib
+            prefix: lib
+            arch-suffix: .arm64
+            addon-subdir: macos
+
+          - os: macos-latest
+            label: macos-x86_64
+            target: x86_64-apple-darwin
+            ext: .dylib
+            prefix: lib
+            arch-suffix: .x86_64
+            addon-subdir: macos
+
+          - os: macos-latest
+            label: ios-arm64
+            target: aarch64-apple-ios
+            ext: .a
+            prefix: lib
+            arch-suffix: ""
+            addon-subdir: ios
+
+          - os: macos-latest
+            label: ios-x86_64
+            target: x86_64-apple-ios
+            ext: .a
+            prefix: lib
+            arch-suffix: .x86_64
+            addon-subdir: ios
+
+          - os: ubuntu-latest
+            label: android-arm64
+            target: aarch64-linux-android
+            ext: .so
+            prefix: lib
+            arch-suffix: .arm64
+            addon-subdir: android
+
+          - os: ubuntu-latest
+            label: android-x86_64
+            target: x86_64-linux-android
+            ext: .so
+            prefix: lib
+            arch-suffix: .x86_64
+            addon-subdir: android
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+
+      # --- Linux ARM64 ---
+      - name: Install Linux ARM64 cross toolchain
+        if: matrix.target == 'aarch64-unknown-linux-gnu'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+          echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
+
+      # --- Android ---
+      - name: Install Android NDK
+        if: contains(matrix.target, 'linux-android')
+        uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r27c
+          add-to-path: false
+
+      - name: Configure Android linker
+        if: contains(matrix.target, 'linux-android')
+        shell: bash
+        run: |
+          NDK_HOME="${{ steps.setup-ndk.outputs.ndk-path }}"
+          TOOLCHAIN="$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin"
+
+          echo "::group::NDK setup"
+          echo "NDK path: $NDK_HOME"
+          echo "Toolchain: $TOOLCHAIN"
+          ls "$TOOLCHAIN"/aarch64-linux-android*-clang 2>/dev/null | head -3
+          ls "$TOOLCHAIN"/x86_64-linux-android*-clang 2>/dev/null | head -3
+          echo "::endgroup::"
+
+          if [ "${{ matrix.target }}" = "aarch64-linux-android" ]; then
+            echo "CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$TOOLCHAIN/aarch64-linux-android21-clang" >> $GITHUB_ENV
+            echo "CC_aarch64_linux_android=$TOOLCHAIN/aarch64-linux-android21-clang" >> $GITHUB_ENV
+          elif [ "${{ matrix.target }}" = "x86_64-linux-android" ]; then
+            echo "CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER=$TOOLCHAIN/x86_64-linux-android21-clang" >> $GITHUB_ENV
+            echo "CC_x86_64_linux_android=$TOOLCHAIN/x86_64-linux-android21-clang" >> $GITHUB_ENV
+          fi
+
+      # --- Build ---
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Rename artifact with arch suffix
+        shell: bash
+        run: |
+          mkdir -p dist
+          SRC="target/${{ matrix.target }}/release/${{ matrix.prefix }}${{ env.PACKAGE_NAME }}${{ matrix.ext }}"
+          DST="dist/${{ matrix.prefix }}${{ env.PACKAGE_NAME }}${{ matrix.arch-suffix }}${{ matrix.ext }}"
+          cp "$SRC" "$DST"
+          echo "Renamed -> $DST"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.label }}
+          path: dist/
+
+  package:
+    name: Package addon
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: temp-artifacts
+
+      - name: Assemble addon directory
+        shell: bash
+        run: |
+          ADDON_DIR="addons/godot_ratex"
+          mkdir -p dist-addon/godot_ratex
+          cp "$ADDON_DIR/godot_ratex.gdextension" dist-addon/godot_ratex/
+
+          declare -A SUBDIRS=(
+            ["linux-x86_64"]="linux"
+            ["linux-arm64"]="linux"
+            ["windows-x86_64"]="windows"
+            ["macos-arm64"]="macos"
+            ["macos-x86_64"]="macos"
+            ["android-arm64"]="android"
+            ["android-x86_64"]="android"
+            ["ios-arm64"]="ios"
+            ["ios-x86_64"]="ios"
+          )
+
+          for artifact in temp-artifacts/*/; do
+            name=$(basename "$artifact")
+            subdir="${SUBDIRS[$name]:-unknown}"
+            mkdir -p "dist-addon/godot_ratex/$subdir"
+
+            file=$(ls "$artifact" | head -1)
+            cp "$artifact/$file" "dist-addon/godot_ratex/$subdir/$file"
+            echo "  + $subdir/$file"
+          done
+
+          echo ""
+          echo "Final addon structure:"
+          find dist-addon -type f | sort
+
+      - name: Extract version
+        id: version
+        shell: bash
+        run: |
+          VER=$(grep '^version' Cargo.toml | head -1 | sed 's/.*"\(.*\)"/\1/')
+          echo "version=$VER" >> $GITHUB_OUTPUT
+
+      - name: Create release archive
+        shell: bash
+        run: |
+          cd dist-addon
+          zip -r "../godot_ratex-v${{ steps.version.outputs.version }}.zip" godot_ratex/
+
+      - name: Upload to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: godot_ratex-v${{ steps.version.outputs.version }}.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: godot_ratex-addon
+          path: godot_ratex-v*.zip

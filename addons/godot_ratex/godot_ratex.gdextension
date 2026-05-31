@@ -1,0 +1,16 @@
+[configuration]
+entry_symbol = "gdext_rust_init"
+compatibility_minimum = "4.2"
+
+[libraries]
+linux.x86_64 = "linux/libgodot_ratex.x86_64.so"
+linux.arm64 = "linux/libgodot_ratex.arm64.so"
+windows.x86_64 = "windows/godot_ratex.x86_64.dll"
+windows.arm64 = "windows/godot_ratex.arm64.dll"
+macos.x86_64 = "macos/libgodot_ratex.x86_64.dylib"
+macos.arm64 = "macos/libgodot_ratex.arm64.dylib"
+android.arm64 = "android/libgodot_ratex.arm64.so"
+android.x86_64 = "android/libgodot_ratex.x86_64.so"
+ios = "ios/libgodot_ratex.a"
+ios.simulator.x86_64 = "ios/libgodot_ratex.x86_64.a"
+ios.simulator.arm64 = "ios/libgodot_ratex.simulator.a"
