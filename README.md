@@ -64,7 +64,7 @@ Returns a `PackedByteArray` containing PNG image bytes, or an empty array on err
 | Platform | Architecture | Status |
 |----------|-------------|--------|
 | Linux | x86_64, arm64 | ✓ |
-| Windows | x86_64, arm64 | ✓ |
+| Windows | x86_64 | ✓ |
 | macOS | arm64, x86_64 | ✓ |
 | iOS | arm64, x86_64 | ✓ |
 | Android | arm64, x86_64 | ✓ |
