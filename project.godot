@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="Godot RaTeX"
+config/version="1.0.0"
 run/main_scene="uid://dv8k2m3lpx4w7"
 config/features=PackedStringArray("4.6", "Forward Plus")
 
