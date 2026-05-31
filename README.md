@@ -6,7 +6,7 @@ Render LaTeX math expressions to images inside Godot 4.2+ using the [RaTeX](http
 
 1. Download the latest release from [Releases](../../releases).
 2. Extract the zip into your Godot project's `addons/` folder.
-3. Enable the plugin in **Project → Project Settings → Plugins**.
+3. Reload the project
 
 The folder structure should look like:
 
@@ -21,14 +21,21 @@ your_project/
         ├── windows/
         │   ├── godot_ratex.x86_64.dll
         │   └── godot_ratex.arm64.dll
-        └── macos/
-            ├── libgodot_ratex.x86_64.dylib
-            └── libgodot_ratex.arm64.dylib
+        ├── macos/
+        │   ├── libgodot_ratex.x86_64.dylib
+        │   └── libgodot_ratex.arm64.dylib
+        ├── android/
+        │   ├── libgodot_ratex.arm64.so
+        │   └── libgodot_ratex.x86_64.so
+        └── ios/
+            ├── libgodot_ratex.a
+            ├── libgodot_ratex.x86_64.a
+            └── libgodot_ratex.simulator.a
 ```
 
 ### Demo
 
-This repository is also a working Godot project. Open `project.godot` in Godot 4.6.3, then run `./build.sh` to compile the extension for your platform. The demo scene (`main.tscn`) provides a UI to type LaTeX expressions, tweak font size/padding/background color, and see the rendered result.
+This repository is also a working Godot 4.6.3 project. Open `project.godot`, then run `./build.sh` to compile the extension for your platform. The demo scene (`main.tscn`) provides a UI to type LaTeX expressions, tweak font size, padding, background, and font color, and see the rendered result.
 
 ## Usage (GDScript)
 
@@ -51,22 +58,22 @@ $LaTeXDisplay.texture = texture
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `latex_string` | `String` | The LaTeX math expression to render |
+| `latex_string` | `String` | LaTeX math expression to render |
 | `font_size` | `float` | Font size in pixels |
 | `padding` | `float` | Padding around the rendered formula |
 | `background_color` | `Color` | Background color (including alpha for transparency) |
-| `font_color` | `Color` | Foreground/text color for the rendered formula |
+| `font_color` | `Color` | Foreground/text color |
 
-Returns a `PackedByteArray` containing PNG image bytes, or an empty array on error.
+Returns a `PackedByteArray` containing PNG bytes, or an empty array on error.
 
 ## Supported Platforms
 
 | Platform | Architecture | Status |
 |----------|-------------|--------|
 | Linux | x86_64, arm64 | ✓ |
-| Windows | x86_64 | ✓ |
+| Windows | x86_64, arm64 | ✓ |
 | macOS | arm64, x86_64 | ✓ |
-| iOS | arm64, x86_64 | ✓ |
+| iOS | arm64 (device), x86_64 (sim), arm64 (sim) | ✓ |
 | Android | arm64, x86_64 | ✓ |
 
 ## Development
@@ -74,33 +81,45 @@ Returns a `PackedByteArray` containing PNG image bytes, or an empty array on err
 ### Prerequisites
 
 - Rust toolchain (stable)
-- Godot 4.2+
+- Godot 4.6+ (should be working on earlier 4+ versions, untested)
+- iOS builds: Xcode (macOS only)
+- Android builds: Android NDK (linux/amd64 host recommended — CI uses NDK r27c)
 
-### Building from source
+### Build
 
 ```bash
 # Build for current platform (debug)
 ./build.sh
 
-# Build for current platform (release)
+# For current platform (release)
 ./build.sh --release
 
-# Build specific platform
+# Build specific platforms
 ./build.sh --platform linux,android
 
-# Build everything for release
+# Build all targets (release, skips cross-compile from incompatible hosts)
 ./build.sh --all
 ```
 
-Compiled libraries are placed directly in `addons/godot_ratex/<platform>/`.
+Compiled libraries go into `addons/godot_ratex/<platform>/`.
 
-### Running tests
+### Test
 
 ```bash
 ./test.sh                # Run all tests
-./test.sh --release      # Run in release mode
-./test.sh --test parse   # Run only tests matching "parse"
-./test.sh --verbose      # Show full test output
+./test.sh --release      # Release mode
+./test.sh --test parse   # Filter by name
+./test.sh --verbose      # Full output
+```
+
+### CI / Releases
+
+Every push runs tests and builds all platform/arch targets via GitHub Actions. Release archives are assembled automatically when you publish a release on GitHub.
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+# Create the release on GitHub → CI packages and uploads the addon zip
 ```
 
 ## License

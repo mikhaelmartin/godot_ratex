@@ -55,6 +55,14 @@ jobs:
             arch-suffix: .x86_64
             addon-subdir: windows
 
+          - os: windows-11-arm
+            label: windows-arm64
+            target: aarch64-pc-windows-msvc
+            ext: .dll
+            prefix: ""
+            arch-suffix: .arm64
+            addon-subdir: windows
+
           - os: macos-latest
             label: macos-arm64
             target: aarch64-apple-darwin
@@ -218,6 +226,7 @@ jobs:
             ["linux-x86_64"]="linux"
             ["linux-arm64"]="linux"
             ["windows-x86_64"]="windows"
+            ["windows-arm64"]="windows"
             ["macos-arm64"]="macos"
             ["macos-x86_64"]="macos"
             ["android-arm64"]="android"
