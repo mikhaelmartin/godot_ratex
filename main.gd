@@ -45,8 +45,7 @@ func _on_render_button_pressed() -> void:
 	if latex.is_empty():
 		return
 
-	var renderer := RaTeXRenderer.new()
-	var png_bytes := renderer.render_latex(
+	var png_bytes := RaTeXRenderer.render_latex(
 		latex,
 		float(font_size_spin.value),
 		float(padding_spin.value),

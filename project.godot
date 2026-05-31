@@ -10,5 +10,10 @@ config_version=5
 
 [application]
 
-config/name="RaTeX Demo"
+config/name="Godot RaTeX"
+run/main_scene="uid://dv8k2m3lpx4w7"
 config/features=PackedStringArray("4.6", "Forward Plus")
+
+[rendering]
+
+textures/vram_compression/import_etc2_astc=true
