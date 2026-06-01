@@ -29,8 +29,7 @@ func _check_plugin() -> void:
 	if not ClassDB.class_exists("RaTeXRenderer"):
 		status_label.text = (
 			"Error: RaTeXRenderer class not found.\n"
-			+ "Enable the addon in Project → Project Settings → Plugins,\n"
-			+ "then restart the editor."
+			+ "Try reinstalling the plugin or restart the editor."
 		)
 		status_label.add_theme_color_override("font_color", Color.RED)
 		render_button.disabled = true
@@ -45,13 +44,13 @@ func _on_render_button_pressed() -> void:
 	if latex.is_empty():
 		return
 
-	var png_bytes := RaTeXRenderer.render_latex(
-		latex,
-		float(font_size_spin.value),
-		float(padding_spin.value),
-		bg_color_picker.color,
-		fg_color_picker.color,
-	)
+	var renderer := RaTeXRenderer.new()
+	renderer.font_size = float(font_size_spin.value)
+	renderer.padding = float(padding_spin.value)
+	renderer.background_color = bg_color_picker.color
+	renderer.font_color = fg_color_picker.color
+
+	var png_bytes := renderer.render_latex(latex)
 
 	if png_bytes.is_empty():
 		status_label.text = "Render failed — check console for errors"
@@ -72,5 +71,5 @@ func _on_render_button_pressed() -> void:
 	texture_rect.texture = texture
 	texture_rect.size = texture.get_size()
 
-	status_label.text = "Rendered: %d×%d px" % [image.get_width(), image.get_height()]
+	status_label.text = "Rendered: %dx%d px" % [image.get_width(), image.get_height()]
 	status_label.remove_theme_color_override("font_color")

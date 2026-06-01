@@ -91,50 +91,6 @@ $LaTeXDisplay.texture = texture
 
 Please visit the [godot_ratex](https://github.com/mikhaelmartin/godot-ratex) project for more information on how to contribute and build the library.
 
-### Prerequisites
-
-- Rust toolchain (stable)
-- Godot 4.6+ (should be working on earlier 4+ versions, untested)
-- iOS builds: Xcode (macOS only)
-- Android builds: Android NDK (linux/amd64 host recommended — CI uses NDK r27c)
-
-### Build
-
-```bash
-# Build for current platform (debug)
-./build.sh
-
-# For current platform (release)
-./build.sh --release
-
-# Build specific platforms
-./build.sh --platform linux,android
-
-# Build all targets (release, skips cross-compile from incompatible hosts)
-./build.sh --all
-```
-
-Compiled libraries go into `addons/godot_ratex/<platform>/`.
-
-### Test
-
-```bash
-./test.sh                # Run all tests
-./test.sh --release      # Release mode
-./test.sh --test parse   # Filter by name
-./test.sh --verbose      # Full output
-```
-
-### CI / Releases
-
-Every push runs tests and builds all platform/arch targets via GitHub Actions. Release archives are assembled automatically when you publish a release on GitHub.
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-# Create the release on GitHub → CI packages and uploads the addon zip
-```
-
 ## License
 
 MIT

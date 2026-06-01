@@ -10,23 +10,40 @@ unsafe impl ExtensionLibrary for RaTeXExtension {}
 #[class(base=RefCounted)]
 struct RaTeXRenderer {
     base: Base<RefCounted>,
+
+    #[var]
+    font_size: f32,
+
+    #[var]
+    padding: f32,
+
+    #[var]
+    background_color: Color,
+
+    #[var]
+    font_color: Color,
 }
 
 #[godot_api]
 impl IRefCounted for RaTeXRenderer {
     fn init(base: Base<RefCounted>) -> Self {
-        Self { base }
+        Self {
+            base,
+            font_size: 48.0,
+            padding: 12.0,
+            background_color: Color::from_rgba(1.0, 1.0, 1.0, 1.0),
+            font_color: Color::from_rgba(0.0, 0.0, 0.0, 1.0),
+        }
     }
 }
 
 #[godot_api]
 impl RaTeXRenderer {
     #[func]
-    fn render_latex(
-        latex_string: String, font_size: f32, padding: f32, background_color: Color, font_color: Color) -> PackedByteArray {
+    fn render_latex(&self, latex_string: String) -> PackedByteArray {
         
-        let font_color = ratex_types::Color::new(font_color.r, font_color.g, font_color.b, font_color.a);
-        let background_color = ratex_types::Color::new(background_color.r, background_color.g, background_color.b, background_color.a);
+        let font_color = ratex_types::Color::new(self.font_color.r, self.font_color.g, self.font_color.b, self.font_color.a);
+        let background_color = ratex_types::Color::new(self.background_color.r, self.background_color.g, self.background_color.b, self.background_color.a);
 
         // 1. Parsing String menjadi AST
         let parse_nodes = match ratex_parser::parse(&latex_string) {
@@ -46,8 +63,8 @@ impl RaTeXRenderer {
         
         // 4. Set RenderOptions
         let render_options = ratex_render::RenderOptions {
-            font_size,
-            padding,
+            font_size: self.font_size,
+            padding: self.padding,
             background_color,
             ..Default::default()
         };
