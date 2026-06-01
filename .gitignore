@@ -1,5 +1,11 @@
-# Visual Studio Code
+# Command Code
 .commandcode/
+
+# GDExtension compiled binaries
+addons/**/*.so
+addons/**/*.dylib
+addons/**/*.dll
+addons/**/*.a
 
 # Godot 4.2+ specific ignores
 ~*.dll
