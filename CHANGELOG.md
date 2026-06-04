@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.0] — 2026-06-05
+
+### Added
+- `render_png()`, `render_svg()`, and `render_pdf()` methods — replaces the old `render_latex()` with separate format-specific methods
+- SVG output now includes background fill via `<rect>` and converts `rgba()` → hex for Godot's ThorVG compatibility
+- `convert_rgba_to_hex()` utility to fix ThorVG colour parsing for embedded glyph paths
+- Demo scene now has an **Image Source** dropdown for switching between PNG Buffer and SVG String
+- First LaTeX preset is auto-selected on demo launch
+
 ## [1.1.1] — 2026-06-01
 
 ### Added

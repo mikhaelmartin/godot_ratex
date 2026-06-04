@@ -36,9 +36,6 @@ text = "Presets"
 [node name="Presets" type="OptionButton" parent="VBoxContainer" unique_id=1106512159]
 unique_name_in_owner = true
 layout_mode = 2
-item_count = 1
-popup/item_0/text = "Select a preset..."
-popup/item_0/id = 0
 
 [node name="LatexLabel" type="Label" parent="VBoxContainer" unique_id=1494363744]
 layout_mode = 2
@@ -47,6 +44,7 @@ text = "LaTeX Expression"
 [node name="LatexInput" type="LineEdit" parent="VBoxContainer" unique_id=2112416911]
 unique_name_in_owner = true
 layout_mode = 2
+text = "E = mc^2"
 placeholder_text = "E = mc^2"
 
 [node name="SettingsGrid" type="GridContainer" parent="VBoxContainer" unique_id=1373721876]
@@ -93,6 +91,20 @@ text = "Foreground"
 [node name="FgColorPicker" type="ColorPickerButton" parent="VBoxContainer/SettingsGrid" unique_id=944256296]
 unique_name_in_owner = true
 layout_mode = 2
+
+[node name="FetchLabel" type="Label" parent="VBoxContainer" unique_id=-1423535075]
+layout_mode = 2
+text = "Image Source"
+
+[node name="Format" type="OptionButton" parent="VBoxContainer" unique_id=579888426]
+unique_name_in_owner = true
+layout_mode = 2
+selected = 0
+item_count = 2
+popup/item_0/text = "PNG Buffer"
+popup/item_0/id = 0
+popup/item_1/text = "SVG String"
+popup/item_1/id = 1
 
 [node name="RenderButton" type="Button" parent="VBoxContainer" unique_id=453439268]
 unique_name_in_owner = true

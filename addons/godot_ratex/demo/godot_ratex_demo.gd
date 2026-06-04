@@ -5,6 +5,7 @@ extends Control
 @onready var padding_spin: SpinBox = %PaddingSpin
 @onready var bg_color_picker: ColorPickerButton = %BgColorPicker
 @onready var fg_color_picker: ColorPickerButton = %FgColorPicker
+@onready var format_opt: OptionButton = %Format
 @onready var render_button: Button = %RenderButton
 @onready var texture_rect: TextureRect = %TextureRect
 @onready var status_label: Label = %StatusLabel
@@ -23,6 +24,8 @@ const PRESETS := {
 func _ready() -> void:
 	for label in PRESETS:
 		presets.add_item(label)
+	presets.select(0)
+	_on_presets_item_selected(0)
 	_check_plugin()
 
 func _check_plugin() -> void:
@@ -50,24 +53,34 @@ func _on_render_button_pressed() -> void:
 	renderer.background_color = bg_color_picker.color
 	renderer.font_color = fg_color_picker.color
 
-	var png_bytes := renderer.render_latex(latex)
-
-	if png_bytes.is_empty():
-		status_label.text = "Render failed — check console for errors"
-		status_label.add_theme_color_override("font_color", Color.RED)
-		texture_rect.texture = null
-		return
-
 	var image := Image.new()
-	var err := image.load_png_from_buffer(png_bytes)
+	var err := OK
+
+	match format_opt.selected:
+		0:
+			var png_bytes := renderer.render_png(latex)
+			if png_bytes.is_empty():
+				status_label.text = "Render failed — check console for errors"
+				status_label.add_theme_color_override("font_color", Color.RED)
+				texture_rect.texture = null
+				return
+			err = image.load_png_from_buffer(png_bytes)
+		1:
+			var svg_string := renderer.render_svg(latex)
+			if svg_string.is_empty():
+				status_label.text = "Render failed — check console for errors"
+				status_label.add_theme_color_override("font_color", Color.RED)
+				texture_rect.texture = null
+				return
+			err = image.load_svg_from_string(svg_string)
+	
 	if err != OK:
-		status_label.text = "Failed to decode PNG (error %d)" % err
+		status_label.text = "Failed to decode image (error %d)" % err
 		status_label.add_theme_color_override("font_color", Color.RED)
 		texture_rect.texture = null
 		return
 
 	var texture := ImageTexture.create_from_image(image)
-	
 	texture_rect.texture = texture
 	texture_rect.size = texture.get_size()
 

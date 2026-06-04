@@ -1,6 +1,6 @@
 [package]
 name = "godot_ratex"
-version = "1.1.1"
+version = "1.2.0"
 edition = "2024"
 
 [lib]
@@ -18,3 +18,5 @@ ratex-parser = { git = "https://github.com/erweixin/RaTeX.git" }
 ratex-types = { git = "https://github.com/erweixin/RaTeX.git" }
 ratex-layout = { git = "https://github.com/erweixin/RaTeX.git" }
 ratex-render = { git = "https://github.com/erweixin/RaTeX.git", features = ["embed-fonts"] }
+ratex-svg = { git = "https://github.com/erweixin/RaTeX.git", features = ["embed-fonts"] }
+ratex-pdf = { git = "https://github.com/erweixin/RaTeX.git", features = ["embed-fonts"] }

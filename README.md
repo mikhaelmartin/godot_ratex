@@ -35,7 +35,7 @@ your_project/
 
 ### Demo
 
-This repository is also a working Godot 4.6.3 project. The demo scene (`addons/godot_ratex/demo/godot_ratex_demo.tscn`) provides a UI with presets, a LaTeX input field, and controls for font size, padding, background color, and font color. Click **Render** to see the result in real time.
+This repository is also a working Godot 4.6.3 project. The demo scene (`addons/godot_ratex/demo/godot_ratex_demo.tscn`) provides a UI with LaTeX presets (auto-selected on launch), a LaTeX input field, an **Image Source** dropdown to choose between PNG and SVG output, and controls for font size, padding, background color, and font color. Click **Render** to see the result in real time.
 
 ## Usage (GDScript)
 
@@ -49,7 +49,7 @@ renderer.background_color = Color.WHITE
 renderer.font_color = Color.BLACK
 
 # Render to PNG bytes
-var png_bytes = renderer.render_latex("E = mc^2")
+var png_bytes = renderer.render_png("E = mc^2")
 
 if png_bytes.is_empty():
     push_error("LaTeX rendering failed")
@@ -75,7 +75,9 @@ $LaTeXDisplay.texture = texture
 
 | Method | Returns | Description |
 |--------|---------|-------------|
-| `render_latex(latex_string: String)` | `PackedByteArray` | Renders the LaTeX expression with current property values. Returns PNG bytes, or empty array on error. |
+| `render_png(latex_string: String)` | `PackedByteArray` | Renders LaTeX to PNG bytes, or empty array on error. |
+| `render_svg(latex_string: String)` | `String` | Renders LaTeX to an SVG string with background fill and embedded glyph paths, or empty string on error. |
+| `render_pdf(latex_string: String)` | `PackedByteArray` | Renders LaTeX to PDF bytes, or empty array on error. |
 
 ## Supported Platforms
 
